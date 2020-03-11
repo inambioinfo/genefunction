@@ -16,7 +16,8 @@ parser.add_argument('--corr-method', dest='corr_method', default="pearson",
                     help='correlation method ex pearson/spearman')
 parser.add_argument('--from-raw', dest='fram_raw', default=False,
                     help='boolean generate coexp matrix from raw data')
-
+parser.add_argument('--test', dest='test', default=False,
+                    help='boolean test mode')
 args = parser.parse_args()
 
 print(args)
@@ -111,7 +112,10 @@ def save(obj, ratio):
 def main():
 	for ratio in range(0, 11, 1):
 		coexp_df = generate_coexp_matrix(ratio*0.1, args.fram_raw)
-		output_fname = save(coexp_df, ratio)
+		if args.test == True:
+			output_fname = save(coexp_df.iloc[:100, :100], ratio)
+		else:
+			output_fname = save(coexp_df, ratio)
 
 		print("Saved! {}".format(output_fname))
 
