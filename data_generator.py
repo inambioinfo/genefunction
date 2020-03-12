@@ -10,13 +10,13 @@ import rpy2.robjects as robjects
 from rpy2.robjects import r, pandas2ri
 
 parser = argparse.ArgumentParser(description='.')
-parser.add_argument('--exp-index', dest='exp_index', default=5,
+parser.add_argument('--exp-index', type=int, dest='exp_index', default=5,
                     help='experiment index number')
 parser.add_argument('--corr-method', dest='corr_method', default="pearson",
                     help='correlation method ex pearson/spearman')
-parser.add_argument('--from-raw', dest='fram_raw', default=False,
+parser.add_argument('--from-raw', type=bool, dest='fram_raw', default=False,
                     help='boolean generate coexp matrix from raw data')
-parser.add_argument('--test', dest='test', default=False,
+parser.add_argument('--test', type=bool, dest='test', default=False,
                     help='boolean test mode')
 args = parser.parse_args()
 
@@ -85,9 +85,12 @@ def generate_coexp_matrix(ratio, from_raw=False):
 	coexp_transcriptomics = read_rda(coexp_file["transcriptome"])
 	print(time.time()-strt_time)
 	# filter common genes
-	coexp_transcriptomics, coexp_proteomics = filter_common_genes(coexp_transcriptomics, coexp_proteomics)
+	
 	if args.exp_index == 5:
+		coexp_transcriptomics, coexp_proteomics = filter_common_genes(coexp_transcriptomics, coexp_proteomics)
 		coexp_df = ratio * coexp_proteomics + (1-ratio) * coexp_transcriptomics
+	elif args.exp_index == 2:
+		coexp_df = coexp_transcriptomics
 
 	print(coexp_df.head())
 	print(coexp_df.shape)
@@ -103,13 +106,15 @@ def coexp_matrix(df, method="pearson"):
 def save(obj, ratio):
 	print("Saving co-expression matrix...")
 	output_fname = output_directory+"exp{}_{}.pkl".format(args.exp_index, ratio)
-	with open(output_fname, "wb") as f:
-		pickle.dump(obj, f)
+	# with open(output_fname, "wb") as f:
+	# 	pickle.dump(obj, f)
+	obj.to_pickle(output_fname)
 
 	return output_fname
 
 
 def main():
+
 	for ratio in range(0, 11, 1):
 		coexp_df = generate_coexp_matrix(ratio*0.1, args.fram_raw)
 		if args.test == True:
@@ -118,6 +123,9 @@ def main():
 			output_fname = save(coexp_df, ratio)
 
 		print("Saved! {}".format(output_fname))
+
+		if args.exp_index != 5:
+			break
 
 
 if __name__ == "__main__":
