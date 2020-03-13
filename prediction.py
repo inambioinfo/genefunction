@@ -121,26 +121,6 @@ def evaluation(prediction_df, gene_geneset_dict):
 		# break
 
 
-# #scaling the prediction because is returns the best results like this
-# spred = scale(prediction)
-
-# auc = c()
-# for (current_gene in sgenes) {
-#     geneprob = spred[current_gene,]
-#     v1 = colnames(spred) %in% reversegmt[[current_gene]] 
-
-#     oo = rev(order(geneprob))
-#     ov1 = v1[oo]
-
-#     cumulative = cumsum(ov1)
-#     scaled_y = scale_vector(cumulative, 0, 1)
-#     scaled_x= scale_vector(1:length(cumulative), 0, 1)
-    
-#     auc[current_gene] = trapz(scaled_x, scaled_y)
-#     #plot((1:length(cumulative))/length(cumulative),cumulative/max(cumulative), type="l", main=paste(current_gene, round(auc[current_gene], digits=2)))
-#     #abline(0,1, col="blue")
-# }
-
 def main():
 	with open("./result.txt", "w") as f:
 		for library in library_files.keys():

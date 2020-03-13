@@ -4,7 +4,7 @@ import sys
 import time
 import pickle
 
-
+import numpy as np
 
 import rpy2.robjects as robjects
 from rpy2.robjects import r, pandas2ri
@@ -28,14 +28,20 @@ coexp_file = {
 	
 	"proteomicsdb": "../ProteomicsDB/coexp_proteomics_df_filtered_proteomicsdb.csv",
 	"ccle": "../ProteomicsDB/coexp_proteomics_df_filtered_CCLE.csv",
-	"proteomics": "../ProteomicsDB/coexp_proteomics_df_filtered_ccle+proteomics.csv",	
+	"proteomics": "../ProteomicsDB/coexp_proteomics_df_filtered_ccle+proteomics_new.csv",	
 	"transcriptome": "../../Data/ARCHS4/human_correlation.rda",
+	"proteomics_normalized": "../ProteomicsDB/coexp_proteomics_df_filtered_ccle+proteomics_normalized.csv"
+	# "proteomicsdb": "./data/coexp_proteomics_df_filtered_proteomicsdb.csv",
+	# "ccle": "./data/coexp_proteomics_df_filtered_CCLE.csv",
+	# "proteomics": "./data/coexp_proteomics_df_filtered_ccle+proteomics_new.csv",	
+	# "transcriptome": "./data/human_correlation.rda",
+	# "proteomics_normalized": "./data/coexp_proteomics_df_filtered_ccle+proteomics_normalized.csv"
 
 }
 
 raw_data_file = {
-	"proteomicsdb": "../ProteomicsDB/proteomics_matrix_filtered_2020_02_21.tsv",
-	"ccle": "../ProteomicsDB/proteomics_matrix_filtered_CCLE.tsv",
+	"proteomicsdb": "./data/proteomics_matrix_filtered_proteomicsdb.tsv",
+	"ccle": "./data/ProteomicsDB/proteomics_matrix_filtered_CCLE.tsv",
 }
 
 def read_rda(filename):
@@ -68,12 +74,35 @@ def generate_coexp_matrix(ratio, from_raw=False):
 	if from_raw == True:
 		print("Generating co-expression matrix from raw datasets...")
 		proteomicsdb = pd.read_csv(raw_data_file["proteomicsdb"], sep="\t", index_col=0)
-		coexp_proteomicsdb = coexp_matrix(proteomicsdb, method=args.corr_method)
-		coexp_proteomicsdb.to_csv(coexp_file["proteomicsdb"])
-
 		ccle = pd.read_csv(raw_data_file["ccle"], sep="\t", index_col = 0)
-		coexp_ccle= coexp_matrix(ccle, method=args.corr_method)
-		coexp_ccle.to_csv(coexp_file["ccle"])
+		
+		if args.exp_index == 8:
+			# z-norm before concatenation
+			print("Normalization...")
+			proteomicsdb_t = proteomicsdb.transpose().copy()
+			z_norm_proteomicsdb = ((proteomicsdb_t-proteomicsdb_t.mean())/proteomicsdb_t.std()).transpose()
+			
+			ccle_t = ccle.transpose().copy()
+			z_norm_ccle = ((ccle_t-ccle_t.mean())/ccle_t.std()).transpose()
+			
+			proteomics = z_norm_proteomicsdb.join(z_norm_ccle, how='inner')
+
+		else:
+			print("Concat...")
+			proteomics = proteomicsdb.join(ccle, how='inner')
+
+		print("Conducting coexp func...")
+		coexp_proteomics = coexp_matrix(proteomics, method=args.corr_method)
+
+		print("Saving...")
+		coexp_proteomics.to_csv(coexp_file["proteomics"])
+		# coexp_proteomicsdb.to_csv(coexp_file["proteomicsdb"])
+
+		# coexp_ccle= coexp_matrix(ccle, method=args.corr_method)
+		# coexp_ccle.to_csv(coexp_file["ccle"])
+# proteomics_normalized
+
+
 	else:
 		print("Generating co-expression matrix from pre-processed datasets...")
 		# coexp_proteomicsdb = pd.read_csv(coexp_file["proteomicsdb"], index_col=0)
@@ -91,6 +120,10 @@ def generate_coexp_matrix(ratio, from_raw=False):
 		coexp_df = ratio * coexp_proteomics + (1-ratio) * coexp_transcriptomics
 	elif args.exp_index == 2:
 		coexp_df = coexp_transcriptomics
+	# elif args.exp_index == 8:
+
+
+
 
 	print(coexp_df.head())
 	print(coexp_df.shape)
@@ -99,7 +132,12 @@ def generate_coexp_matrix(ratio, from_raw=False):
 
 def coexp_matrix(df, method="pearson"):
 	
-	return df.T.corr(method=method)
+	# return df.T.corr(method=method)
+	corr = np.corrcoef(df.values)
+	result_df = pd.DataFrame(corr)
+	result_df.index = df.index
+	result_df.columns = df.index
+	return result_df
 
 
 
