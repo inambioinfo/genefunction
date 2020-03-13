@@ -26,16 +26,16 @@ print(args)
 output_directory = "./data/"
 coexp_file = {
 	
-	"proteomicsdb": "../ProteomicsDB/coexp_proteomics_df_filtered_proteomicsdb.csv",
-	"ccle": "../ProteomicsDB/coexp_proteomics_df_filtered_CCLE.csv",
-	"proteomics": "../ProteomicsDB/coexp_proteomics_df_filtered_ccle+proteomics_new.csv",	
-	"transcriptome": "../../Data/ARCHS4/human_correlation.rda",
-	"proteomics_normalized": "../ProteomicsDB/coexp_proteomics_df_filtered_ccle+proteomics_normalized.csv"
-	# "proteomicsdb": "./data/coexp_proteomics_df_filtered_proteomicsdb.csv",
-	# "ccle": "./data/coexp_proteomics_df_filtered_CCLE.csv",
-	# "proteomics": "./data/coexp_proteomics_df_filtered_ccle+proteomics_new.csv",	
-	# "transcriptome": "./data/human_correlation.rda",
-	# "proteomics_normalized": "./data/coexp_proteomics_df_filtered_ccle+proteomics_normalized.csv"
+	# "proteomicsdb": "../ProteomicsDB/coexp_proteomics_df_filtered_proteomicsdb.csv",
+	# "ccle": "../ProteomicsDB/coexp_proteomics_df_filtered_CCLE.csv",
+	# "proteomics": "../ProteomicsDB/coexp_proteomics_df_filtered_ccle+proteomics_new.csv",	
+	# "transcriptome": "../../Data/ARCHS4/human_correlation.rda",
+	# "proteomics_normalized": "../ProteomicsDB/coexp_proteomics_df_filtered_ccle+proteomics_normalized.csv"
+	"proteomicsdb": "./data/coexp_proteomics_df_filtered_proteomicsdb.csv",
+	"ccle": "./data/coexp_proteomics_df_filtered_CCLE.csv",
+	"proteomics": "./data/coexp_proteomics_df_filtered_ccle+proteomics_new.csv",	
+	"transcriptome": "./data/human_correlation.rda",
+	"proteomics_normalized": "./data/coexp_proteomics_df_filtered_ccle+proteomics_normalized.csv"
 
 }
 
@@ -115,11 +115,12 @@ def generate_coexp_matrix(ratio, from_raw=False):
 	print(time.time()-strt_time)
 	# filter common genes
 	
-	if args.exp_index == 5:
+	if args.exp_index in [5, 8]:
 		coexp_transcriptomics, coexp_proteomics = filter_common_genes(coexp_transcriptomics, coexp_proteomics)
 		coexp_df = ratio * coexp_proteomics + (1-ratio) * coexp_transcriptomics
 	elif args.exp_index == 2:
 		coexp_df = coexp_transcriptomics
+
 	# elif args.exp_index == 8:
 
 
