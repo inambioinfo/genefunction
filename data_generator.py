@@ -40,8 +40,8 @@ coexp_file = {
 }
 
 raw_data_file = {
-	"proteomicsdb": "./data/proteomics_matrix_filtered_proteomicsdb.tsv",
-	"ccle": "./data/ProteomicsDB/proteomics_matrix_filtered_CCLE.tsv",
+	"proteomicsdb": "./data/proteomics_matrix_filtered_proteomicsdb.csv",
+	"ccle": "./data/ProteomicsDB/proteomics_matrix_filtered_CCLE.csv",
 }
 
 def read_rda(filename):
@@ -73,8 +73,8 @@ def generate_coexp_matrix(ratio, from_raw=False):
 	print("Generating co-expression matrix...")
 	if from_raw == True:
 		print("Generating co-expression matrix from raw datasets...")
-		proteomicsdb = pd.read_csv(raw_data_file["proteomicsdb"], sep="\t", index_col=0)
-		ccle = pd.read_csv(raw_data_file["ccle"], sep="\t", index_col = 0)
+		proteomicsdb = pd.read_csv(raw_data_file["proteomicsdb"], index_col=0)
+		ccle = pd.read_csv(raw_data_file["ccle"], index_col = 0)
 		
 		if args.exp_index == 8:
 			# z-norm before concatenation
